@@ -15,22 +15,24 @@ def avatar_choice(user_login):
         img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082414939509096498/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_c6aed91b-389e-4141-900e-b940bec9f196.png'
     if user_login == 't_snegireva':
         img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082401140882284544/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_f22fc649-d613-452a-8592-f7740fed8c49.png'
-    if user_login == 'Echinos':
-        img = 'https://i.ytimg.com/vi/mL8U8tIiRRg/maxresdefault.jpg'
+    if user_login == 'Kkktyaa':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082414385747738715/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_c527071c-0535-448f-a325-30773cfb3a07.png'
     if user_login == 'GustenevaEka':
         img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082410958183485451/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_a69cec6d-6add-4be7-8f4c-5c567511157f.png'
-    if user_login == '':
-        img = ''
-    if user_login == '':
-        img = ''
-    if user_login == '':
-        img = ''
-    if user_login == '':
-        img = ''
-    if user_login == '':
-        img = ''
-    if user_login == '':
-        img = ''
+    if user_login == 'KAimetova':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082408262810468465/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_37201490-669f-4c35-8201-9bd3458ba6a5.png'
+    if user_login == 'Irina_Podelyakina':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082403767409987644/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_33ca0669-391e-4880-9d9c-7ee23ef88e5c.png'
+    if user_login == 'kukshtal':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082410409740484678/echinos_young_woman_savior_of_mankind_futuristic_hight_detalisa_7d101f52-dccf-44fd-9c66-a11aaf5880dd.png'
+    if user_login == 'TatyanaPakhomovaa':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082412488034898071/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_0c5219f3-d23f-4537-ac2c-8afdc6d10b1b.png'
+    if user_login == 'alina_shadrinaa':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082404981161861282/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_6083718c-f818-4a05-8ef2-610ffe08167b.png'
+    if user_login == 'GerasimovaAna':
+        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082405984573603840/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_6a635c38-d3fd-4c54-8f03-30aacb32a1a6.png'
+    if user_login == 'OlenOnnellinen':
+        img = 'https://cdn.discordapp.com/attachments/997261049373929592/1082572872578498640/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_360a0a1e-4da1-462f-87f8-f6e97dbab093.png'
 
     return img
 
