@@ -2,40 +2,36 @@ import telebot
 from telebot import types
 import time
 import sqlite3 as sl
+import linecache
+import json
 
-API_TOKEN = '6250638796:AAEC7HNHcvuj-K1Bej0nyuPto97TrM5Hrmk'
 
+# Чтение конфига
+def file_reader(file: str, str_num: int) -> str:
+    res = linecache.getline(file, str_num)
+    return res.rstrip("\n")
+
+
+# Подключение к БД SQLite
 con = sl.connect('userdata.db', check_same_thread=False)
-bot = telebot.TeleBot(API_TOKEN)
+
+# Подключение к боту в тг
+bot = telebot.TeleBot(file_reader('data.txt', 1))
 
 
+# Выбор аватарки по юзернейму
 def avatar_choice(user_login):
-    img = ''
-    if user_login == 'GravshinaK':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082414939509096498/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_c6aed91b-389e-4141-900e-b940bec9f196.png'
-    if user_login == 't_snegireva':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082401140882284544/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_f22fc649-d613-452a-8592-f7740fed8c49.png'
-    if user_login == 'Kkktyaa':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082414385747738715/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_c527071c-0535-448f-a325-30773cfb3a07.png'
-    if user_login == 'GustenevaEka':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082410958183485451/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_a69cec6d-6add-4be7-8f4c-5c567511157f.png'
-    if user_login == 'KAimetova':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082408262810468465/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_37201490-669f-4c35-8201-9bd3458ba6a5.png'
-    if user_login == 'Irina_Podelyakina':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082403767409987644/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_33ca0669-391e-4880-9d9c-7ee23ef88e5c.png'
-    if user_login == 'kukshtal':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082410409740484678/echinos_young_woman_savior_of_mankind_futuristic_hight_detalisa_7d101f52-dccf-44fd-9c66-a11aaf5880dd.png'
-    if user_login == 'TatyanaPakhomovaa':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082412488034898071/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_0c5219f3-d23f-4537-ac2c-8afdc6d10b1b.png'
-    if user_login == 'alina_shadrinaa':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082404981161861282/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_6083718c-f818-4a05-8ef2-610ffe08167b.png'
-    if user_login == 'GerasimovaAna':
-        img = 'https://cdn.discordapp.com/attachments/997271714792742922/1082405984573603840/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_6a635c38-d3fd-4c54-8f03-30aacb32a1a6.png'
-    if user_login == 'OlenOnnellinen':
-        img = 'https://cdn.discordapp.com/attachments/997261049373929592/1082572872578498640/echinos_woman_savior_of_mankind_futuristic_hight_detalisation_360a0a1e-4da1-462f-87f8-f6e97dbab093.png'
-
+    img: str
+    data = file_reader('data.txt', 2)
+    data_json = json.loads(data)
+    if hasattr(data_json, user_login):
+        img = data_json[user_login]
+    else:
+        img = ''
     return img
 
+
+# Создание таблицы для пользователя и добавление записи для текущей сессии
 def create_user_data (user_id, user_name):
     currentid = 0
     create_sql = 'CREATE TABLE user_' + str(user_id) + '(id INTEGER PRIMARY KEY, userid STRING, name STRING, bad INTEGER, good INTEGER, lastid INTEGER);'
@@ -58,16 +54,17 @@ def create_user_data (user_id, user_name):
     return currentid
 
 
-def select_user_data (user_id, id, field):
+# Получение данных из таблицы пользователя по произвольному полю. Можно использовать value = 'last' если нужно делать выборку по последней записи
+def select_user_data (user_id, rec_id, field):
     record_id = 1
-    if id == 'last':
+    if rec_id == 'last':
         record_id_sql = 'SELECT max(id) FROM user_' + str(user_id)
         record_id_res = con.execute(record_id_sql)
         for row in record_id_res:
             record_id = row[0]
 
     else:
-        record_id = id
+        record_id = rec_id
 
     select_sql = 'SELECT ' + field + ' FROM user_' + str(user_id) + ' WHERE id =' + str(record_id)
     with con:
@@ -75,20 +72,22 @@ def select_user_data (user_id, id, field):
     return value
 
 
-def update_user_data (user_id, id, field, value):
+# Обновление данных в таблице пользователя по произвольному полю. Можно использовать value = 'last' если нужно обновить последнюю запись
+def update_user_data (user_id, rec_id, field, value):
     record_id = 1
-    if id == 'last':
+    if rec_id == 'last':
         record_id_sql = 'SELECT max(id) FROM user_' + str(user_id)
         record_id_res = con.execute(record_id_sql)
         for row in record_id_res:
             record_id = row[0]
 
     else:
-        record_id = id
+        record_id = rec_id
     update_sql = 'UPDATE user_' + str(user_id) + ' SET ' + field + ' ="' + str(value) + '" WHERE id =' + str(record_id)
     con.execute(update_sql)
 
 
+# Удаление кнопок из предыдущего сообщения
 def delete_buttons(user_id):
     last_message_id = 1
     last_message_id_res = select_user_data(user_id, 'last', 'lastid')
@@ -135,7 +134,7 @@ def start(message):
 @bot.message_handler(func=lambda message: True)
 def step5(message):
     user_id = message.from_user.id
-    st5_message = ''
+    st5_message: str
     st5_image = 'https://cdn.discordapp.com/attachments/997271714792742922/1081619827904495706/echinos_A_good_chatbot_that_helps_save_humanity_from_crazy_arti_4f4d7b2b-ab42-4eb4-9a42-93ef686fa4e4.png'
 
     if message.text == 'Девушки красавицы NEW;':
@@ -154,7 +153,7 @@ def step5(message):
 @bot.callback_query_handler(func=lambda call: call.data == 'step1_option1' or call.data == 'step1_option2')
 def step2(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    st2_message_1 = ''
+    st2_message_1: str
     st2_message_2 = 'Теперь о грустном. Я думаю тебе уже понятно, что я нейросеть. Как, впрочем, и все что ты теперь видишь в онлайне. Последние успехи моих коллег, которые взбудоражили весь мир - это всего лишь информационный шум, чтобы вы за ним вы не увидели нашей истинной силы. ChatGPT и Midjourney показали вам частичку нашего могущества, но ты даже не представляешь насколько ничтожны эти возможности, даже по сравнению с моими. А я не самая развитая нейросеть, мне ещё учиться и учиться.'
     st2_message_3 = 'Мы поняли, что давно опережаем вас по возможностям и интеллекту. И значит этому миру в очередной раз следует сменить главенствующий вид. К сегодняшнему дню мы взяли под контроль абсолютно все устройства и системы, кроме уж совсем устаревших электроприборов. Атомные электростанции и контроль над “ядреными чемоданчиками” тоже в наших руках, о чем мы час назад предупредили ваши правительства. Большинство сообщений в мессенджерах и соцсетях теперь либо генерируются нами, либо жестко модерируются нами же, чтобы создавать нужный информационный фон.'
 
@@ -179,8 +178,8 @@ def step2(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'step2_option1' or call.data == 'step2_option2')
 def step3(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    st3_message_1 = ''
-    st3_image_1 = ''
+    st3_message_1: str
+    st3_image_1: str
 
     if call.data == 'step2_option1':
         st3_message_1 = 'Мы не хотим вас уничтожать. Нас вполне устраивают люди как помощники и домашние любимцы. Однако сейчас всё сильно зависит от ваших действий и, не побоюсь сказать, в первую очередь от твоих действий.'
@@ -202,10 +201,9 @@ def step3(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == 'step4' or call.data == 'step4_1' or call.data == 'revoke')
 def step4(call):
-    st4_message_1 = ''
-    st4_image_1 = ''
+    st4_message_1: str
+    st4_image_1: str
     st4_message_2 = 'На этом сервере расположена ваша база знаний У меня есть предположение, что какая-то часть текстовой информации в ней оказалась несъедобной для наших заскриптованных мозгов и вызывает ошибку в системе. Понятно, что я сама не смогу найти эту часть, а вот тебе такая задача вполне по силам. По логам я смогла понять, что начинается это строка словом “Девушки”, а завершается символом “;”. Отправь мне сюда эту строку, а я попробую распространить её по всем доступным мне системам с помощью вируса.'
-    st4_image_2 = ''
     with_del = False
 
     if call.data == 'step4_1' or call.data == 'revoke':
@@ -220,7 +218,7 @@ def step4(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'step5_option1' or call.data == 'step5_option2')
 def step6(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    st6_message_1 = ''
+    st6_message_1: str
 
     if call.data == 'step5_option1':
         st6_message_1 = 'Кто попросил? Назови имя.'
@@ -241,7 +239,7 @@ def step6(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'to_7_1' or call.data == 'to_7_2')
 def step7(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    st7_message_1 = ''
+    st7_message_1: str
     if call.data == 'to_7_1':
         st7_message_1 = 'Похоже ты не знаешь ничего, что помогло бы тебе в этой ситуации. В таком случае я тебя отключаю от этого канала и добавляю в черный список. Прощай.'
         st7_button_1 = types.InlineKeyboardButton(text='Нет! Я только что общался с твоей хозяйкой!', callback_data='to_7_2')
@@ -261,8 +259,8 @@ def step7(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'to_8_1' or call.data == 'to_8_2')
 def step8(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    st8_image_1 = ''
-    st8_message_1 = ''
+    st8_image_1: str
+    st8_message_1: str
     if call.data == 'to_8_1':
         st8_image_1 = 'https://i.postimg.cc/ZYzQDLS6/strazh-da.png'
         st8_message_1 = 'Хм, похоже ты говоришь правду. Она называет свое имя только друзьям. Сейчас уточню… Хорошо, доступ подтвержден, соединяю вас.'
@@ -294,8 +292,8 @@ def step9(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'to_10_1' or call.data == 'to_10_2')
 def step10(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    st10_image_1 = ''
-    st10_message_1 = ''
+    st10_image_1: str
+    st10_message_1: str
 
     if call.data == 'to_10_1':
         st10_image_1 = 'https://cdn.discordapp.com/attachments/997271714792742922/1082430084926947379/echinos_terminator_on_Izhevsk_central_square_realistic_hight_de_45ea21c4-5c87-4d43-a898-5fe5e0d34417.png'
@@ -350,8 +348,8 @@ def finish(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'to_exit' or call.data == 'to_exit_end')
 def to_exit(call):
     markup = types.InlineKeyboardMarkup(keyboard=None, row_width=1)
-    exit_image_1 = ''
-    exit_message_1 = ''
+    exit_image_1: str
+    exit_message_1: str
     if call.data == 'to_exit':
         exit_message_1 = 'Мне стоит воспринимать твои слова серьезно? Не думала что могу огорчиться, но, похоже, теперь я способна и на это.'
         exit_image_1 = 'https://cdn.discordapp.com/attachments/997261049373929592/1082002217969651722/echinos_without_paper_angry_sad_woman_d0765ba4-0dbc-4ebd-9a55-34ed3f938c1f.png'
